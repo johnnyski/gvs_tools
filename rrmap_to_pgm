@@ -1,0 +1,17 @@
+#! /usr/local/bin/perl
+
+# Usage: rrmap_to_pgm < rrmap.ascii.mmddyy.hhss > file.pgm
+#
+# To view the resulting image, use: xv -hist file.pgm
+
+printf("P2\n");
+printf("# rrmap image.\n");
+printf("151 151\n");
+printf("255\n");
+while(<>) {
+	chop;
+	s/-//g;
+#	s/(\.\d)\d/$1/g;
+	s/\.//g;
+	print $_,"\n";
+}

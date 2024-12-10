@@ -1,0 +1,22 @@
+#! /usr/local/bin/perl
+
+if ($#ARGV != 1) {
+	print STDERR "Usage: $0 anno_str level_1.gif\n\n";
+    print STDERR "   EX: $0 \"MELB 09/03/98 12:43\" MELB_DZ_090398_1243.gif\n";
+    print STDERR "       The input gif is usually producde by any_to_gif,\n";
+    print STDERR "       which is usually called by level_1_ghdf_to_gif.\n\n";
+    print STDERR "Output: Browse_level_1.gif, ex: Browse_MELB_DZ_090398_1243.gif\n";
+    exit -1;
+}
+$anno   = $ARGV[0];
+$infile = $ARGV[1];
+
+$i_dir = "/usr/local/trmm/GVBOX/data";
+system("combine -geometry +0+0 $i_dir/1C51_black.miff $infile r3.miff$$");
+system("combine -geometry +90+405 r3.miff$$ $i_dir/1C51_color_bar.miff rcombine.miff$$");
+system("rm r3.miff$$");
+system("convert -pen yellow -draw 'text 10,450 \"" . $anno ."\"' rcombine.miff$$ r$$.ppm");
+system("rm rcombine.miff$$");
+system("(ppmquant 256 < r$$.ppm 2>/dev/null) | ppmtogif > Browse_" . "$infile  2>/dev/null");
+system("rm r$$.ppm");
+

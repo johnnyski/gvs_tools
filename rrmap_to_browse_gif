@@ -1,0 +1,25 @@
+#! /usr/local/bin/perl
+
+if ($#ARGV != 1) {
+	print STDERR "Usage: $0 anno_str infile.ascii\n";
+    print STDERR "   EX: $0 \"MELB 090398 12:43\" MELB-090398-1243.ascii\n";
+    print STDERR "Output: infile.ascii.gif\n";
+    exit -1;
+}
+$anno   = $ARGV[0];
+$infile = $ARGV[1];
+
+$i_dir = "/usr/local/trmm/GVBOX/data";
+
+system("rrmap_to_ppm < $infile > r.ppm$$");
+system("convert -geometry 200% -flip r.ppm$$ r2.miff$$");
+system("rm r.ppm$$");
+system("combine -geometry +0+0 $i_dir/2A53_black.miff r2.miff$$ r3.miff$$");
+system("rm r2.miff$$");
+system("combine -geometry +30+305 r3.miff$$ $i_dir/2A53_color_bar.miff rcombine.miff$$");
+system("rm r3.miff$$");
+system("convert -pen yellow -draw 'text 10,350 \"" . $anno ."\"' rcombine.miff$$ r$$.ppm");
+system("rm rcombine.miff$$");
+system("(ppmquant 256 < r$$.ppm 2>/dev/null) | ppmtogif > $infile" . ".gif 2>/dev/null");
+system("rm r$$.ppm");
+

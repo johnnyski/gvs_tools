@@ -1,0 +1,71 @@
+#! /usr/local/bin/perl
+
+# Usage: rrmap_to_ppm < rrmap.ascii.mmddyy.hhss > file.ppm
+#
+# The image is upside down!
+# To view the resulting image, use: xv -vflip file.pgm
+
+# Load color tables.
+# These tables are those used by image generation for RSL reflectivity.
+# To use them properly, I'll contrast enhance the rain map.
+$RSL_COLOR_DIR = "/usr/local/trmm/GVBOX/lib/colors";
+$REFL_RED_FILE = "$RSL_COLOR_DIR/red_reflectivity.clr";
+$REFL_GREEN_FILE = "$RSL_COLOR_DIR/grn_reflectivity.clr";
+$REFL_BLUE_FILE = "$RSL_COLOR_DIR/blu_reflectivity.clr";
+
+@red = &load_color($REFL_RED_FILE);
+@grn = &load_color($REFL_GREEN_FILE);
+@blu = &load_color($REFL_BLUE_FILE);
+
+# This color is basically the last color index in the table, dispite there
+# being many more color indexes (205 color indexes all together, or so).
+# I want the output images to stay below this index.
+$max_usable_color = 61;
+$log_start = 36;
+
+printf("P6\n");
+printf("# rrmap image.\n");
+printf("151 151\n");
+printf("255\n");
+while(<>) {
+	chop;
+	s/-//g;
+	@nums = split;
+	foreach $num (@nums) {
+		$x = $num;
+		if ($x != 99) {
+			$x *= 10;
+# 40 is the color from the reflectivity that is the freezing point.
+# For rainmaps, though, it seems that the rain rates climb exponentially.
+# Therefore, break up the color bar for particular rain rate ranges.
+			if ($x >= $log_start) {
+#				printf STDERR " = $x  ...";
+# 3.5 to 10 uses the colors from 36 to 45
+# 10  to 100 uses the colors 46 to 55
+# 55 + rr/100 for rr > 100
+				$x /= 10;
+				if ($x <= 10) {
+					$x = ($x-3.5)/(10-3.5)*(45-36) + 36;
+				} elsif ($x <= 100) {
+					$x = ($x-10)/(100-10)*(55-45) + 45;
+				} else {
+					$x = 55 + $x/100;
+				}
+#				printf STDERR "X = $x\n";
+			}
+		}
+		$x = $max_usable_color if ($x >= $max_usable_color);
+
+		print $red[$x], $grn[$x], $blu[$x];
+	}
+}
+
+sub load_color {
+	local($filename) = @_;
+
+	open(F, $filename);
+	binmode F;
+	$color = <F>;
+	close F;
+	split(//, $color);
+}

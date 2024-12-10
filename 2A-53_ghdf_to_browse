@@ -1,0 +1,39 @@
+#! /usr/local/bin/perl
+
+#
+# Take a granule HDF file and construct the browse image for 2A-53.
+# Output is a series of GIF images (w/ GIF compression)
+#
+
+if ($#ARGV != 0) {
+	print STDERR "Usage: $0 2A53_ghdf\n\n";
+	print STDERR "Output is a series of GIF images.\n";
+    print STDERR "The list of GIF images is printed to STDOUT\n";
+	exit -1;
+}
+
+$ghdf_file = $ARGV[0];
+
+unless (open(F, "level_2_ghdf_to_singlevos_ascii 3 $ghdf_file |")) {
+	print STDERR "Unable to open level_2_ghdf_to_singlevos_ascii 3 $ghdf_file |\n";
+	exit -1;
+}
+
+while (<F>) {
+	chop;
+	$ascii_file = $_;
+	@part = split('/');
+
+# I want the 'tail' of the path.
+    $file = $part[$#part];
+
+# But, I must remove the .ascii suffix for annotation.
+	@part = split('\.', $file);
+	$anno = join('.', @part[0..$#part-1]);
+
+	system("rrmap_to_browse_gif \"$anno\" $ascii_file");
+	print "$ascii_file" . ".gif\n";
+	unlink($ascii_file);
+}
+
+exit 0;

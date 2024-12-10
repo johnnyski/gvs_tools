@@ -1,0 +1,31 @@
+CHANGES for gvs_tools
+---------------------
+
+v1.6 (2/17/00)
+---------------
+1. Corrected the path for perl includes.
+
+v1.5 (12/21/99)
+-------------
+1. Replaced rrmap_to_pgm with the copy from v1.2 (not unscale rain rates).
+2. Uses configure.
+
+v1.4 (3/9/97)
+--------------
+1. Added Browse generation for 1B51, 1C51, 2A53 and 2A54.  
+   Annotated and w/ color scale.
+
+2. Relies on ImageMagik 4.*
+
+v1.3 (6/27/97)
+--------------
+1. Modified rrmap_to_pgm.
+
+v1.2 TBD
+---------------
+1. Fixed rrmap_to_pgm and csmap_to_pgm
+2. Fixed the Makefile so can be compiled by GVBOX on the HP.
+3. Code follows ANSI standard.
+
+v1.1 (1/13/97)
+----------------
